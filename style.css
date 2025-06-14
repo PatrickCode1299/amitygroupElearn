@@ -1,0 +1,144 @@
+/*
+Theme Name: GoodLayers LMS Custom Theme
+Author: Your Name
+Version: 1.0
+Description: A custom LMS theme integrated with GoodLayers plugin.
+*/
+
+/* Add your theme CSS or link it via functions.php */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom, #004aad 0%, #004aad 30%, #ffffff 30%, #ffffff 100%);
+    color: #333;
+}
+
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.site-header {
+    background-color: #004aad;
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.site-header .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.site-header .logo a {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.main-nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+}
+
+.main-nav li a {
+    color: white;
+    padding: 0.5rem 0;
+    transition: border-bottom 0.3s;
+}
+
+.main-nav li a:hover {
+    border-bottom: 2px solid #ffcc00;
+}
+/* Modern social icons */
+.social-icons.clean-icons a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0066cc;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.social-icons.clean-icons a:hover {
+    background-color: #004aad;
+    transform: scale(1.1);
+}
+
+.social-icons.clean-icons i {
+    font-size: 1.2rem;
+}
+
+
+/* Mobile Navigation (optional basic) */
+@media (max-width: 768px) {
+    #menu-toggle {
+        display: block;
+    }
+
+    .main-nav {
+        position: relative;
+    }
+
+    .main-nav ul {
+        flex-direction: column;
+        background: #004aad;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 200px;
+        display: none;
+        padding: 1rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        z-index: 999;
+    }
+
+    .main-nav ul.show {
+        display: flex;
+    }
+
+    .main-nav ul li {
+        margin-bottom: 1rem;
+    }
+}
+
+.main-nav li a {
+    color: white;
+    padding: 0.5rem 0;
+    position: relative;
+    transition: color 0.3s;
+}
+
+.main-nav li a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    height: 2px;
+    background: #ffcc00;
+    transition: width 0.3s ease;
+}
+
+.main-nav li a:hover::after {
+    width: 100%;
+}
+
+#menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+}
