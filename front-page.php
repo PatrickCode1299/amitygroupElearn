@@ -1,3 +1,10 @@
+<?php
+/*
+if (is_user_logged_in()) {
+    wp_redirect(site_url('/user-dashboard'));
+    exit;
+} **/
+?>
 <?php get_header(); ?>
 
 <style>
@@ -253,6 +260,28 @@ section {
     left: 1rem;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
+.skill-card {
+    position: relative;
+    padding-bottom: 3rem; /* to make room for the button */
+}
+
+.skill-card .start-now-btn {
+    margin-top: 1rem;
+    padding: 0.4rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.skill-card .start-now-btn:hover {
+    background-color: #0056b3;
+}
+
 @media (max-width: 768px) {
   .hero {
     flex-direction: column;
@@ -289,7 +318,7 @@ section {
 <!-- HERO SECTION -->
 <section class="hero" data-aos="fade-up">
     <div class="text">
-        <h1>Welcome to AmityGroupTrainers</h1>
+        <h1>Start Here, Learn a Skill With AmityGroupTrainers</h1>
         <p>Empowering professionals, organizations, and individuals through world-class training. Grow, transform, and lead with Amity.</p>
     </div>
     <div class="image">
@@ -315,9 +344,10 @@ if (!empty($categories) && !is_wp_error($categories)) :
         $icon = $icons[$i % count($icons)];
         $i++;
         ?>
-        <a href="<?= esc_url($link); ?>">
+        <a href="<?= esc_url($link); ?>" class="skill-card">
             <i class="fa-solid <?= esc_attr($icon); ?>"></i>
-            <?= esc_html($category->name); ?>
+            <div><?= esc_html($category->name); ?></div>
+            <button class="start-now-btn">Start Now</button>
         </a>
     <?php endforeach;
 else : ?>
