@@ -93,6 +93,8 @@ footer .social-icons a {
     font-size: 1.2rem;
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 <?php wp_footer(); ?>
+
 </body>
 </html>
