@@ -11,6 +11,29 @@ if (is_user_logged_in()) {
 section {
     padding: 4rem 2rem;
 }
+.cta {
+      background: #ffcc00;
+      color: #004aad;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    .md-btn{
+      background: #ffcc00;
+      color: #004aad;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      width:500px;
+    }
+    
+.cta:hover{
+    color: white;
+}
 
 .skills-section,
 .learners-section,
@@ -19,7 +42,7 @@ section {
     padding: 3rem 1.5rem;
 }
 .hero {
-    background: linear-gradient(to right, #004aad, #007bff);
+    background: linear-gradient(to right, #004aad, #01458dff);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -100,7 +123,7 @@ section {
 
 /* Testimonials */
 .testimonials {
-    background: linear-gradient(to right, #004aad, #007bff);
+    background: linear-gradient(to right, #004aad, #074688ff);
     color: white;
     padding: 5rem 2rem;
     text-align: center;
@@ -313,6 +336,28 @@ section {
     padding-right: 2rem;
     max-width: 600px; /* Optional: helps prevent overflow */
 }
+.skills-section {
+    background-color: #064aa1ff; /* Soft blue background */
+}
+
+.learners-section {
+    background-color: #f0f6ff; /* Subtle blue-gray */
+}
+
+.objectives {
+    background-color: #e1edff; /* Light blue-gray for more contrast */
+}
+
+.objectives .item {
+    background-color: #ffffff; /* Still use white cards on colored bg */
+}
+
+.skills-grid a {
+    background-color: #ffffff;
+}
+
+
+
 </style>
 
 <!-- HERO SECTION -->
@@ -320,13 +365,14 @@ section {
     <div class="text">
         <h1>Start Here, Learn a Skill With AmityGroupTrainers</h1>
         <p>Empowering professionals, organizations, and individuals through world-class training. Grow, transform, and lead with Amity.</p>
+        <a href="<?php echo site_url('/courses'); ?>" class="md-btn ">Start Now</a>
     </div>
     <div class="image">
         <img src="https://images.stockcake.com/public/7/e/a/7ea17dad-b620-48de-99ea-6b49a2c3e861_large/corporate-training-session-stockcake.jpg" alt="Modern corporate training session">
     </div>
 </section>
 <section class="skills-section" data-aos="fade-right">
-    <h2>All the Skills You Need in One Place</h2>
+    <h2 style="color:white;">All the Skills You Need in One Place</h2>
     <div class="skills-grid">
       <?php
 $icons = ['fa-laptop-code', 'fa-lightbulb', 'fa-users', 'fa-chalkboard-teacher', 'fa-database', 'fa-briefcase', 'fa-robot', 'fa-network-wired', 'fa-flask', 'fa-brain'];
@@ -354,37 +400,6 @@ else : ?>
     <p>No course categories found.</p>
 <?php endif; ?>
 
-    </div>
-</section>
-
-<!-- OBJECTIVES SECTION -->
-<section class="objectives" data-aos="fade-up">
-    <h2>What We Offer</h2>
-    <div class="grid">
-        <div class="item">
-            <h3>Corporate IT & Supply Chain</h3>
-            <p>Equipping staff with the latest digital tools and operational strategies.</p>
-        </div>
-        <div class="item">
-            <h3>Diversity Awareness</h3>
-            <p>Inclusive training for doctors, lawyers, and legal professionals.</p>
-        </div>
-        <div class="item">
-            <h3>Professional Development</h3>
-            <p>Advance your career with upskilling opportunities in education and beyond.</p>
-        </div>
-        <div class="item">
-            <h3>Healthcare Coaching</h3>
-            <p>Personalized learning paths for modern medical professionals.</p>
-        </div>
-        <div class="item">
-            <h3>Organizational Growth</h3>
-            <p>Strategic workforce development for dynamic organizations.</p>
-        </div>
-        <div class="item">
-            <h3>Workforce Upskilling</h3>
-            <p>Build capacity across teams through structured, goal-driven learning.</p>
-        </div>
     </div>
 </section>
 <section class="learners-section">
@@ -420,6 +435,37 @@ else : ?>
         ?>
     </div>
 </section>
+<!-- OBJECTIVES SECTION -->
+<section class="objectives" data-aos="fade-up">
+    <h2>What We Offer</h2>
+    <div class="grid">
+        <div class="item">
+            <h3>Corporate IT & Supply Chain</h3>
+            <p>Equipping staff with the latest digital tools and operational strategies.</p>
+        </div>
+        <div class="item">
+            <h3>Diversity Awareness</h3>
+            <p>Inclusive training for doctors, lawyers, and legal professionals.</p>
+        </div>
+        <div class="item">
+            <h3>Professional Development</h3>
+            <p>Advance your career with upskilling opportunities in education and beyond.</p>
+        </div>
+        <div class="item">
+            <h3>Healthcare Coaching</h3>
+            <p>Personalized learning paths for modern medical professionals.</p>
+        </div>
+        <div class="item">
+            <h3>Organizational Growth</h3>
+            <p>Strategic workforce development for dynamic organizations.</p>
+        </div>
+        <div class="item">
+            <h3>Workforce Upskilling</h3>
+            <p>Build capacity across teams through structured, goal-driven learning.</p>
+        </div>
+    </div>
+</section>
+
 
 <!-- TESTIMONIALS SECTION -->
 <section class="testimonials" data-aos="zoom-in">

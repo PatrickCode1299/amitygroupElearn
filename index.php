@@ -1,26 +1,136 @@
 <?php
+/**
+ * Template Name: All Courses
+ */
+
 get_header();
 
-$category = get_queried_object();
+$current_category = get_queried_object();
+$term_id = $current_category->term_id ?? null;
 
-$paged = get_query_var('paged') ? get_query_var('paged') : 1;
+// Group courses by category if available
+$courses_by_category = [];
+if ($term_id) {
+    $args = [
+        'post_type' => 'course',
+        'posts_per_page' => -1,
+        'tax_query' => [
+            [
+                'taxonomy' => 'course_category',
+                'field' => 'term_id',
+                'terms' => $term_id,
+            ]
+        ]
+    ];
+    $query = new WP_Query($args);
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $cats = get_the_terms(get_the_ID(), 'course_category');
+            if ($cats && !is_wp_error($cats)) {
+                foreach ($cats as $cat) {
+                    $courses_by_category[$cat->name][] = get_post();
+                }
+            }
+        }
+    }
+    wp_reset_postdata();
+}
 
-$args = [
-    'post_type' => 'course',
-    'posts_per_page' => 6,
-    'paged' => $paged,
-    'tax_query' => [
-        [
-            'taxonomy' => 'course_category',
-            'field'    => 'term_id',
-            'terms'    => $category->term_id,
-        ],
-    ],
-];
-
-$query = new WP_Query($args);
+// Recommendation fallback logic
+$recommended_courses = [];
+$recommended_cat = null;
+if (empty($courses_by_category)) {
+    $alt_cats = get_terms([
+        'taxonomy' => 'course_category',
+        'exclude' => [$term_id],
+        'hide_empty' => true,
+    ]);
+    foreach ($alt_cats as $alt_cat) {
+        $alt_args = [
+            'post_type' => 'course',
+            'posts_per_page' => 6,
+            'tax_query' => [
+                [
+                    'taxonomy' => 'course_category',
+                    'field' => 'term_id',
+                    'terms' => $alt_cat->term_id,
+                ]
+            ]
+        ];
+        $alt_query = new WP_Query($alt_args);
+        if ($alt_query->have_posts()) {
+            $recommended_cat = $alt_cat;
+            $recommended_courses = $alt_query->posts;
+            wp_reset_postdata();
+            break;
+        }
+    }
+    $cat_link = $recommended_cat ? get_term_link($recommended_cat) : '';
+}
+                
 ?>
 
+<style>
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+.course-card {
+    background: #fff;
+    border: 1px solid #d8e6ff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s;
+}
+.course-card:hover {
+    transform: translateY(-5px);
+}
+.course-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+}
+.course-card-content {
+    padding: 1rem;
+}
+.course-card-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    color: #114a8e;
+}
+.course-card-content .meta {
+    font-size: 0.85rem;
+    color: #777;
+    margin-bottom: 0.4rem;
+}
+.course-card-content .price {
+    font-weight: bold;
+    color: #1a73e8;
+}
+.preview-link {
+    display: block;
+    background: #1a73e8;
+    color: #fff;
+    text-align: center;
+    padding: 0.7rem;
+    text-decoration: none;
+    border-top: 1px solid #d8e6ff;
+    font-weight: 500;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+.preview-link:hover {
+    background: #0f5ab5;
+}
+
+</style>
 <style>
 .course-category-hero {
     position: relative;
@@ -152,51 +262,85 @@ $query = new WP_Query($args);
     background-color: #cddfff;
 }
 </style>
-
 <section class="course-category-hero">
     <div class="content">
-        <h1><?php echo esc_html($category->name); ?> Courses</h1>
-        <p>Learn more about <strong><?php echo esc_html($category->name); ?></strong> from well-curated lessons and professional experts in this field. Start your journey toward growth and mastery today.</p>
+        <h1><?php echo esc_html($current_category->name); ?> Courses</h1>
+        <p>Learn more about <strong><?php echo esc_html($current_category->name); ?></strong> from well-curated lessons and professional experts in this field. Start your journey toward growth and mastery today.</p>
     </div>
 </section>
 
-<section class="course-grid">
-    <?php if ($query->have_posts()) : while ($query->have_posts()) : $query->the_post(); ?>
-        <div class="course-card">
-            <a href="<?php the_permalink(); ?>">
-                <img src="<?= esc_url(get_the_post_thumbnail_url(get_the_ID(), 'medium') ?: 'https://placehold.co/600x400?text=No+Image') ?>" alt="<?php the_title_attribute(); ?>">
-            </a>
-            <div class="info">
-                <h3><?php the_title(); ?></h3>
-                <a href="<?php the_permalink(); ?>">View Course</a>
+
+<div class="gdlr-core-pbf-wrapper">
+    <div class="gdlr-core-pbf-wrapper-content gdlr-core-js">
+        <div class="gdlr-core-pbf-wrapper-container clearfix gdlr-core-container">
+            <div class="gdlr-core-pbf-element">
+                <div class="gdlr-core-title-item gdlr-core-item-pdb clearfix gdlr-core-center-align gdlr-core-title-item-caption-top gdlr-core-item-pdlr">
+                    <div class="gdlr-core-title-item-title-wrap">
+                      
+                    </div>
+                </div>
             </div>
+
+            <?php if (!empty($courses_by_category)): ?>
+                <?php foreach ($courses_by_category as $category => $courses): ?>
+                    <div class="gdlr-core-pbf-element">
+                        <h3 style="font-size: 28px; margin-bottom:0px; text-align:center;"><?php echo esc_html($category); ?></h3>
+                        <section class="course-grid">
+                            <?php foreach ($courses as $course):
+                                $thumb = get_the_post_thumbnail_url($course->ID, 'medium') ?: 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
+                                $settings_raw = get_post_meta($course->ID, 'gdlr-lms-course-settings', true);
+                                $settings = json_decode($settings_raw, true);
+                                $actual_price = isset($settings['price']) ? floatval($settings['price']) : 0;
+                                $main_price = isset($settings['discount-price']) ? floatval($settings['discount-price']) : 0;
+                                $display_price = $main_price > 0 ? $main_price : $actual_price;
+
+                            ?>
+                            <div class="course-card">
+                                <img src="<?php echo esc_url($thumb); ?>" alt="Course thumbnail">
+                                <div class="course-card-content">
+                                    <h3><?php echo esc_html($course->post_title); ?></h3>
+                                    <div class="meta"><?php echo strip_tags(get_the_term_list($course->ID, 'course_category', '', ', ')); ?></div>
+                                   <div class="price"><?php echo $display_price > 0 ? '$' . number_format($display_price, 2) : 'Free'; ?></div>
+
+                                </div>
+                                <a class="preview-link" href="<?php echo get_permalink($course->ID); ?>">Preview Course</a>
+                            </div>
+                            <?php endforeach; ?>
+                        </section>
+                    </div>
+                <?php endforeach; ?>
+            <?php elseif (!empty($recommended_courses)): ?>
+                <div style="text-align:center; margin-top: 2rem; background-color:#eaf3ff; padding:2rem; border-radius:12px; display:block;">
+                    <h3 style="margin-bottom:0.5rem; display:block;">You might like <a href="<?php echo esc_url($cat_link); ?>"><?php echo esc_html($recommended_cat->name); ?> Courses</a></h3>
+                    <p style="margin-top:0; display:block;">We don’t currently have courses in <?php echo esc_html($current_category->name); ?>, but check out our <a href="<?php echo esc_url($cat_link); ?>"><?php echo esc_html($recommended_cat->name); ?></a> category — it’s packed with valuable content!</p>
+                    <div class="course-grid">
+                        <?php foreach ($recommended_courses as $course):
+                            $thumb = get_the_post_thumbnail_url($course->ID, 'medium') ?: 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png';
+                            $settings_raw = get_post_meta($course->ID, 'gdlr-lms-course-settings', true);
+                            $settings = json_decode($settings_raw, true);
+                            $actual_price = isset($settings['price']) ? floatval($settings['price']) : 0;
+                            $main_price = isset($settings['discount-price']) ? floatval($settings['discount-price']) : 0;
+                            $display_price = $main_price > 0 ? $main_price : $actual_price;
+
+                        ?>
+                        <div class="course-card" style="border: 1px solid #b4d7ff;">
+                            <img src="<?php echo esc_url($thumb); ?>" alt="Course thumbnail">
+                            <div class="course-card-content">
+                                <h3><?php echo esc_html($course->post_title); ?></h3>
+                                <div class="meta"><?php echo strip_tags(get_the_term_list($course->ID, 'course_category', '', ', ')); ?></div>
+                                <div class="price"><?php echo $display_price > 0 ? '$' . number_format($display_price, 2) : 'Free'; ?></div>
+
+                            </div>
+                            <a class="preview-link" href="<?php echo get_permalink($course->ID); ?>">Preview Course</a>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <p style="text-align:center;">No courses available in this category yet.</p>
+            <?php endif; ?>
         </div>
-    <?php endwhile; else: ?>
-        <p style="text-align:center;">No courses available in this category yet.</p>
-    <?php endif; ?>
-</section>
-
-<?php if ($query->max_num_pages > 1): ?>
-    <div class="pagination">
-        <?php
-// Pagination
-$total_pages = $query->max_num_pages;
-if ($total_pages > 1) {
-    echo '<div class="pagination">';
-    echo paginate_links([
-        'total' => $total_pages,
-        'current' => $paged,
-        'prev_text' => '« Prev',
-        'next_text' => 'Next »',
-    ]);
-    echo '</div>';
-}
-wp_reset_postdata();
-?>
-
     </div>
-<?php endif; ?>
+</div>
 
-<?php
-wp_reset_postdata();
-get_footer();
+<?php get_footer(); ?>

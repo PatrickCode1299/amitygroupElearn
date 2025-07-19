@@ -3,7 +3,6 @@ get_header();
 
 // Fix: Set global $post from course slug query var
 $course_slug = get_query_var('custom_course_slug');
-
 if ($course_slug) {
     $course_post = get_page_by_path($course_slug, OBJECT, 'course');
     if ($course_post) {
@@ -46,15 +45,11 @@ foreach ($settings as $section) {
 
     foreach ($lectures as $lec) {
         $video_url = '';
-
-        // Extract video URL from lecture-content using regex
         if (!empty($lec['lecture-content'])) {
             if (preg_match('/https?:\/\/[^"\']+\.(mp4|mov|webm|ogg|m4v|avi|pdf)/i', $lec['lecture-content'], $matches)) {
                 $video_url = esc_url($matches[0]);
             }
         }
-
-        // Fallback to lecture-url if no video found
         if (empty($video_url) && !empty($lec['lecture-url'])) {
             $video_url = esc_url($lec['lecture-url']);
         }
@@ -74,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_complete_module'
     if ($mark_idx >= 0 && isset($modules[$mark_idx])) {
         // Store module completion in user meta
         update_user_meta($current_user->ID, "module_{$modules[$mark_idx]['id']}_completed", true);
-        
+
         // Redirect to avoid form resubmission and update current_module param
         $redirect_url = add_query_arg('current_module', $mark_idx, get_permalink());
         wp_safe_redirect($redirect_url);
@@ -82,10 +77,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['mark_complete_module'
     }
 }
 
-// Get user progress and unlocked modules count
-$progress = intval(get_user_meta($current_user->ID, "gdlrms_course_progress_$course_id", true));
-$unlocked_count = floor(count($modules) * ($progress / 100));
-$unlocked_count = max(1, $unlocked_count);
+function has_user_completed_quiz($module_id, $user_id) {
+    return get_user_meta($user_id, "quiz_completed_{$module_id}", true);
+}
+
+$unlocked_count = count($modules); // Unlock all modules after first
+
+
+if (has_user_completed_quiz($modules[0]['id'], $current_user->ID)) {
+    $unlocked_count = 0;
+}
+
+
+$unlocked_count = min($unlocked_count, count($modules)); // Prevent over-unlock
+
+
 
 // Current module index from query param or default
 $current_module_idx = isset($_GET['current_module']) ? intval($_GET['current_module']) : 0;
@@ -97,6 +103,17 @@ if ($current_module_idx + 1 > $unlocked_count) {
 }
 
 $current_module = (!empty($modules) && isset($modules[$current_module_idx])) ? $modules[$current_module_idx] : null;
+
+// Check if the user has passed the quiz for the current module
+
+// Handle "Get Certificate" button for the last module
+function should_show_certificate_button($modules, $current_module_idx, $user_id) {
+    $last_module_idx = count($modules) - 1;
+    $last_module = $modules[$last_module_idx];
+    // Check if the quiz for the last module is completed
+    return has_user_completed_quiz($last_module['id'], $user_id);
+}
+
 ?>
 <style>
   /* Reset box sizing */
@@ -106,7 +123,7 @@ $current_module = (!empty($modules) && isset($modules[$current_module_idx])) ? $
 
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to bottom, rgb(20, 72, 161) 60%, white 40%);
+    background: linear-gradient(to bottom, rgb(4, 27, 66) 60%, white 40%);
     color:white;
     margin: 0;
     padding: 2rem 1rem;
@@ -415,13 +432,29 @@ $quiz_page_url = $quiz_page ? get_permalink($quiz_page->ID) : '';
 ?>
 
 <?php if ($quiz_page_url): ?>
-  <div style="text-align:center; margin-top: 1rem;">
-    <a href="<?php echo esc_url( add_query_arg([
+<div class="module-actions">
+        <?php
+        if ($status !== 'completed' && $status !== 'locked'):
+          // Show quiz or mark as complete button
+          if (has_user_completed_quiz($current_module['id'], $current_user->ID)):
+            echo '<p>You have already taken the quiz.</p>';
+          else:
+            ?>
+        <a href="<?php echo esc_url( add_query_arg([
     'quiz_slug' => sanitize_title($current_module['title']),
     'cid' => $course_id
   ], $quiz_page_url ) ); ?>"
     class="quiz-btn" role="button">Take Quiz</a>
-  </div>
+            <?php
+          endif;
+        endif;
+        ?>
+        <!-- Show Get Certificate for last module after quiz completion -->
+        <?php if ($current_module_idx === count($modules) - 1 && should_show_certificate_button($modules, $current_module_idx, $current_user->ID)): ?>
+          <button class="btn btn-certificate">Get Certificate</button>
+        <?php endif; ?>
+      </div>
+
 <?php else: ?>
   <p style="color:red;">Quiz page not found. Please check the slug.</p>
 <?php endif; ?>
@@ -441,14 +474,29 @@ $quiz_page_url = $quiz_page ? get_permalink($quiz_page->ID) : '';
 ?>
 
 <?php if ($quiz_page_url): ?>
-  <div style="text-align:center; margin-top: 1rem;">
-  <a href="<?php echo esc_url( add_query_arg([
-  'quiz_slug' => sanitize_title($current_module['title']),
-  'cid' => $course_id
-], $quiz_page_url ) ); ?>"
+ <div class="module-actions">
+        <?php
+        if ($status !== 'completed' && $status !== 'locked'):
+          // Show quiz or mark as complete button
+          if (has_user_completed_quiz($current_module['id'], $current_user->ID)):
+            echo '<p>You have already taken the quiz.</p>';
+          else:
+            ?>
+                <a href="<?php echo esc_url( add_query_arg([
+        'quiz_slug' => sanitize_title($current_module['title']),
+        'cid' => $course_id
+      ], $quiz_page_url ) ); ?>"
+        class="quiz-btn" role="button">Take Quiz</a>
+            <?php
+          endif;
+        endif;
+        ?>
+        <!-- Show Get Certificate for last module after quiz completion -->
+        <?php if ($current_module_idx === count($modules) - 1 && should_show_certificate_button($modules, $current_module_idx, $current_user->ID)): ?>
+          <button class="btn btn-certificate">Get Certificate</button>
+        <?php endif; ?>
+      </div>
 
-    class="quiz-btn" role="button">Take Quiz</a>
-  </div>
 <?php else: ?>
   <p style="color:red;">Quiz page not found. Please check the slug.</p>
 <?php endif; ?>

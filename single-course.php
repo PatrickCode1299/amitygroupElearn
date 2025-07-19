@@ -10,6 +10,12 @@ if (get_query_var('custom_course')) {
         setup_postdata($post);
     }
 }
+$settings_raw = get_post_meta(get_the_ID(), 'gdlr-lms-course-settings', true);
+$settings = json_decode($settings_raw, true);
+
+$actual_price = isset($settings['price']) ? floatval($settings['price']) : 0;
+$main_price = isset($settings['discount-price']) ? floatval($settings['discount-price']) : 0;
+
 ?>
 
 <?php
@@ -73,7 +79,14 @@ if (have_posts()) :
 ?>
 <?php
 $current_user = wp_get_current_user();
-$is_paid = (float) get_post_meta(get_the_ID(), 'gdlr-lms-course-price', true) > 0;
+$settings_raw = get_post_meta($course_id, 'gdlr-lms-course-settings', true);
+$settings = json_decode($settings_raw, true);
+
+$actual_price = isset($settings['price']) ? floatval($settings['price']) : 0;
+$main_price = isset($settings['discount-price']) ? floatval($settings['discount-price']) : 0;
+
+$is_free = $actual_price <= 0;
+$is_paid = $actual_price > 0;
 
 if (!is_user_logged_in()) {
     $link = site_url('/signup?redirect=' . ($is_paid ? 'paywall' : 'course') . '&course_id=' . get_the_ID());
@@ -131,6 +144,7 @@ if (!is_user_logged_in()) {
     color: white;
     text-decoration: none;
     border-radius: 5px;
+    max-width:auto;
 }
 
 .enroll-btn:hover {
@@ -216,10 +230,25 @@ if (!is_user_logged_in()) {
 .comment-form textarea,
 .comment-form input {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.35rem;
     margin-bottom: 1rem;
     border-radius: 5px;
     border: 1px solid #ccc;
+}
+.highlight-video-section {
+    background: linear-gradient(135deg, #08082cff, #000305ff);
+    padding: 0.35rem;
+    margin-bottom: 0.35rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.highlight-video-container video,
+.highlight-video-container img {
+    width: 100%;
+    max-height: 480px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .comment-form input[type="submit"] {
@@ -236,50 +265,182 @@ if (!is_user_logged_in()) {
 }
 
 
-/* 🔻 Mobile responsiveness below 768px */
 @media (max-width: 768px) {
+    body {
+        font-family: "Segoe UI", sans-serif;
+        font-size: 15px;
+        background-color: #f2f6fa;
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+
     .course-preview {
-        flex-direction: column;
-    }
-
-    .course-sidebar {
-        max-width: 100%;
-        width: 100%;
-        order: 2;
-    }
-
-    .course-details {
-        width: 100%;
-        order: 1;
-        background-color: #000;
-        padding: 1rem;
+        display: flex;
+        flex-direction: column-reverse;
+        padding: 0.35rem;
+        background: #ffffff;
         border-radius: 10px;
+        margin: 0rem auto;
+        max-width: 100%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
-    .course-title,
-    .course-meta,
+    .course-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #003366;
+        margin-bottom: 0.8rem;
+        text-align: center;
+    }
+
+    .video-wrapper {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .video-wrapper video,
+    .video-wrapper img {
+        width: 100%;
+        height: auto;
+        max-height: 220px;
+        border-radius: 8px;
+        display: block;
+    }
+
+    .enroll-btn {
+        display: block;
+        width: 100%;
+        background-color: #004aad;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 1rem 0;
+    }
+
     .course-details,
-    .course-modules h2,
+    .course-modules,
+    #course-reviews,
+    .course-sidebar {
+        background: #ffffff;
+        padding: 0rem;
+        width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .course-details p,
     .course-modules li,
+    #course-reviews p {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #444;
+    }
+
+    .course-modules h2,
+    .course-details h2,
+    #course-reviews h2 {
+        font-size: 1.2rem;
+        color: #004aad;
+        margin-bottom: 0.5rem;
+    }
+
+    .course-modules ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .course-modules ul li {
+        margin-bottom: 0.5rem;
+        padding-left: 1rem;
+        position: relative;
+    }
+
+    .course-modules ul li::before {
+        content: "▶";
+        position: absolute;
+        left: 0;
+        color: #004aad;
+        font-size: 0.9rem;
+    }
+
     .course-sidebar h3 {
-        color: #fff !important;
+        font-size: 1.1rem;
+        color: #004aad;
+        margin-bottom: 0.5rem;
+    }
+
+    .course-sidebar ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .course-sidebar ul li {
+        font-size: 0.95rem;
+        margin-bottom: 0.4rem;
+        padding-left: 1rem;
+        position: relative;
+    }
+
+    .course-sidebar ul li::before {
+        content: "–";
+        position: absolute;
+        left: 0;
+        color: #aaa;
+    }
+
+    .comment-form textarea,
+    .comment-form input[type="text"],
+    .comment-form input[type="email"] {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-bottom: 1rem;
+        background: #f9f9f9;
+    }
+
+    .comment-form input[type="submit"] {
+        width: 100%;
+        background: #004aad;
+        color: white;
+        border: none;
+        padding: 0.9rem;
+        font-size: 1rem;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
     }
 
     .share-buttons {
-        justify-content: flex-start;
-        flex-direction: column;
-        align-items: flex-start;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-top: 1rem;
     }
 
     .share-buttons a {
-        width: 100%;
-        background: transparent !important;
-        color: #fff !important;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-size: 0.9rem;
+        padding: 0.5rem 0.9rem;
+        border-radius: 20px;
+        background-color: #004aad;
+        color: #fff;
+        text-decoration: none;
+        transition: background 0.3s ease;
     }
 
-    .share-buttons svg {
-        fill: #fff !important;
+    .course-meta {
+        text-align: center;
+        font-size: 0.85rem;
+        color: #777;
+        margin-top: 1rem;
     }
 }
 
@@ -292,31 +453,64 @@ if (!is_user_logged_in()) {
         <ul>
             <li><strong>Level:</strong> <?= get_post_meta(get_the_ID(), 'course_level', true); ?></li>
             <li><strong>Duration:</strong> <?= get_post_meta(get_the_ID(), 'course_duration', true); ?></li>
-            <li><strong>Lessons:</strong>
-                <?php
-                $lessons = get_post_meta(get_the_ID(), 'course_lessons', true);
-                $lesson_array = json_decode($lessons, true);
-                echo is_array($lesson_array) ? count($lesson_array) : 0;
-                ?>
-            </li>
-            <li><strong>Price:</strong>
-                <?php
-                $course_price = get_post_meta(get_the_ID(), 'gdlr-lms-course-price', true);
-                echo empty($course_price) || $course_price == 0 ? 'Free' : '$' . number_format($course_price, 2);
-                ?>
-            </li>
+              <li><strong>Category:</strong>
+                    <?php
+                    $terms = get_the_terms(get_the_ID(), 'course_category');
+                    if (!empty($terms) && !is_wp_error($terms)) {
+                        $category_names = wp_list_pluck($terms, 'name');
+                        echo esc_html(implode(', ', $category_names));
+                    } else {
+                        echo 'Uncategorized';
+                    }
+                    ?>
+                </li>
+             <li><strong>Sessions:</strong>
+                        <?php
+                        $course_content = gdlr_lms_get_course_content_settings(get_the_ID());
+                        $total_lectures = 0;
+
+                        if (!empty($course_content)) {
+                            foreach ($course_content as $section) {
+                                $lectures = json_decode($section['lecture-section'], true);
+                                if (is_array($lectures)) {
+                                    $total_lectures += count($lectures);
+                                }
+                            }
+                        }
+
+                        echo $total_lectures;
+                        ?>
+                </li>
+
+         <li><strong>Price:</strong>
+            <?php
+            if ($actual_price > 0) {
+                echo $main_price > 0 ? "<del>$$main_price</del> <strong>$$actual_price</strong>" : "$$actual_price";
+            } else {
+                echo "Free";
+            }
+            ?>
+        </li>
+
         </ul>
-        <?php if (!is_user_logged_in()) : ?>
+   <?php if (!is_user_logged_in()) : ?>
     <a href="<?= esc_url(wp_login_url(get_permalink())) ?>" class="enroll-btn">Login to Enroll</a>
 
 <?php elseif ($is_free && !$already_enrolled) : ?>
     <a href="<?= esc_url(add_query_arg('enroll', '1')) ?>" class="enroll-btn">Enroll for Free</a>
 
-<?php elseif ($already_enrolled) : ?>
-    <a href="<?= esc_url(get_permalink()) ?>" class="enroll-btn">Go to Course</a>
+<?php elseif ($already_enrolled) : 
+    $course_slug = get_post_field('post_name', $course_id); // Get course slug
+    $classroom_url = site_url('/classroom/' . $course_slug . '/');
+?>
+    <a href="<?= esc_url($classroom_url) ?>" class="enroll-btn">Go to Course</a>
+
+
 
 <?php elseif ($is_paid) : ?>
-    <a href="<?= esc_url(site_url('/paywall?course_id=' . $course_id)) ?>" class="enroll-btn">Buy Course</a>
+    <a href="<?= esc_url(site_url('/paywall?course_id=' . $course_id)) ?>" class="enroll-btn">
+        Buy Course for $<?= number_format($actual_price, 2) ?>
+    </a>
 <?php endif; ?>
 
     </aside>
@@ -324,17 +518,19 @@ if (!is_user_logged_in()) {
     <main class="course-details">
         <h1 class="course-title"><?php the_title(); ?></h1>
 
-        <div class="video-wrapper">
-            <?php if (!empty($intro_video)) : ?>
-                <video controls playsinline>
-                    <source src="<?= $intro_video; ?>" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-            <?php elseif (has_post_thumbnail()) : ?>
-                <?= get_the_post_thumbnail(null, 'large', ['class' => 'course-thumbnail']); ?>
-            <?php else : ?>
-                <p>No intro video or thumbnail.</p>
-            <?php endif; ?>
+       <div class="highlight-video-section">
+            <div class="highlight-video-container">
+                <?php if (!empty($intro_video)) : ?>
+                    <video controls playsinline>
+                        <source src="<?= $intro_video; ?>" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                <?php elseif (has_post_thumbnail()) : ?>
+                    <?= get_the_post_thumbnail(null, 'large', ['class' => 'course-thumbnail']); ?>
+                <?php else : ?>
+                    <p>No intro video or thumbnail.</p>
+                <?php endif; ?>
+            </div>
         </div>
 
         <!-- Course Modules -->

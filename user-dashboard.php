@@ -63,6 +63,16 @@ $user_courses = !empty($user_course_ids) ? get_posts([
     font-size: 0.95rem;
     color: #555;
 }
+.join-course-btn {
+  background: #0074ff;
+  color: white;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  width: 100%;
+}
 @media (max-width: 600px) {
     .dashboard-header h1 {
         font-size: 1.8rem;
@@ -74,6 +84,7 @@ $user_courses = !empty($user_course_ids) ? get_posts([
     <div class="dashboard-header">
         <h1>Welcome, <?= esc_html($current_user->display_name); ?> 👋</h1>
         <p>Here’s your learning dashboard</p>
+        <a href="<?php echo site_url('/courses'); ?>" class="join-course-btn">+ Join a Course</a>
     </div>
 
     <div class="dashboard-content">

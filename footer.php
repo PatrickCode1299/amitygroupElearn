@@ -4,9 +4,8 @@
             <h4>Site Map</h4>
             <ul>
                 <li><a href="/">Home</a></li>
-                <li><a href="/training-services">Training Services</a></li>
+                <li><a href="<?php echo site_url('/courses'); ?>">Courses</a></li>
                 <li><a href="/about">About</a></li>
-                <li><a href="/consulting">Consulting</a></li>
                 <li><a href="/contact">Contact</a></li>
             </ul>
         </div>
@@ -38,7 +37,7 @@
     </div>
 
     <div style="text-align: center; margin-top: 2rem;">
-        <p>&copy; <?php echo date('Y'); ?>  amitygrouptrainers.org</p>
+        <p>&copy; <?php echo date('Y'); ?>  amitygrouptrainers.org <br /> California, United States</p>
     </div>
 </footer>
 <style>

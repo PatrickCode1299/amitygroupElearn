@@ -1,7 +1,8 @@
 <?php
 /* Template Name: All Courses */
+echo "<div style='background-color:rgba(0, 74, 173, 0.95); z-index:1; position:fixed; width:100%;'>";
 get_header();
-
+echo "</div>";
 // Get all course categories
 $categories = get_terms([
     'taxonomy' => 'course_category',
@@ -335,13 +336,19 @@ body {
 </div>
 
 
+
+
 <h2 class="section-title">Popular Categories</h2>
 <div class="popular-category-section">
-    <?php foreach ($top_categories as $cat): ?>
-        <div class="popular-category">
+    <?php foreach ($top_categories as $cat):
+        $term = get_term_by('name', $cat['name'], 'course_category');
+        if ($term):
+            $link = get_term_link($term);
+    ?>
+        <a href="<?= esc_url($link); ?>" class="popular-category">
             <?php echo esc_html($cat['name']); ?> (<?php echo $cat['count']; ?> learners)
-        </div>
-    <?php endforeach; ?>
+        </a>
+    <?php endif; endforeach; ?>
 </div>
 
 <h2 class="section-title">Filter & Sort Courses</h2>
@@ -410,15 +417,36 @@ if (!$filter_applied) {
         <button class="toggle-btn" onclick="toggleCourses('group-<?php echo $toggleIndex; ?>')">Toggle</button>
         <div class="course-grid" id="group-<?php echo $toggleIndex; ?>">
             <?php foreach ($courseList as $course):
-                $thumb = get_the_post_thumbnail_url($course->ID, 'medium') ?: get_template_directory_uri() . '/assets/images/course-placeholder.jpg';
-                $price = get_post_meta($course->ID, 'price', true);
+                //$thumb = get_the_post_thumbnail_url($course->ID, 'medium') ?: get_template_directory_uri() . '/assets/images/course-placeholder.jpg';
+                $thumb = get_the_post_thumbnail_url($course->ID, 'medium');
+
+                    if (!$thumb) {
+                        // Use Unsplash random edutech image
+                        $thumb = 'https://cdn-icons-png.flaticon.com/512/2232/2232688.png';
+                    }
+
+                $settings_raw = get_post_meta($course->ID, 'gdlr-lms-course-settings', true);
+                    $settings = json_decode($settings_raw, true);
+
+                    $actual_price = isset($settings['price']) ? floatval($settings['price']) : 0;
+                    $main_price = isset($settings['discount-price']) ? floatval($settings['discount-price']) : 0;
+
+                    $display_price = $main_price > 0 ? $main_price : $actual_price;
+
             ?>
             <div class="course-card">
                 <img src="<?php echo esc_url($thumb); ?>" alt="Course thumbnail">
                 <div class="course-card-content">
                     <h3><?php echo esc_html($course->post_title); ?></h3>
                     <div class="meta"><?php echo strip_tags(get_the_term_list($course->ID, 'course_category', '', ', ')); ?></div>
-                    <div class="price">$<?php echo number_format((float) $price, 2); ?></div>
+                    <div class="price">
+                        <?php if ($display_price > 0): ?>
+                            $<?php echo number_format($display_price, 2); ?>
+                        <?php else: ?>
+                            Free
+                        <?php endif; ?>
+                    </div>
+
                 </div>
                 <a class="preview-link" href="<?php echo get_permalink($course->ID); ?>">Preview Course</a>
             </div>

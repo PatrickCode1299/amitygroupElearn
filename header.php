@@ -3,6 +3,8 @@
 <head>
   <meta charset="<?php bloginfo('charset'); ?>">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Elearning Platform in California, Empowering professionals, organizations, and individuals through world-class training. Grow, transform, and lead with Amity.">
+
   <link rel="stylesheet" href="<?php echo get_stylesheet_uri(); ?>">
   
   <link

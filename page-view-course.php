@@ -5,7 +5,8 @@ $course_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $is_enrolled = true; // Replace with actual enrollment check
 if (!$is_enrolled) {
     echo '<p>You are not enrolled in this course.</p>';
-    get_footer(); exit;
+    get_footer(); 
+    exit;
 }
 ?>
 <h2>Course Content</h2>

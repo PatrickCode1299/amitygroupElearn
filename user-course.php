@@ -23,7 +23,7 @@ function get_course_progress($user_id, $course_id) {
 
 <style>
 body {
-  background: #f8fbff;
+  background-image:linear-gradient(to bottom, rgb(17, 72, 145), white) ;
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
 }
@@ -277,7 +277,7 @@ body {
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
-      <a href="<?php echo site_url('/'); ?>" class="join-course-btn">+ Join a Course</a>
+      <a href="<?php echo site_url('/courses'); ?>" class="join-course-btn">+ Join a Course</a>
       <nav class="nav-links">
         <a href="#">Dashboard</a>
         <a href="#" class="active">All Courses</a>

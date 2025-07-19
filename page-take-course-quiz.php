@@ -1,21 +1,18 @@
-<?php
+<?php 
 /**
  * Template Name: Take Course Quiz
  */
 
-get_header();
-
-$quiz_name = isset($_GET['quiz_slug']) ? sanitize_title($_GET['quiz_slug']) : '';
+$quiz_slug = isset($_GET['quiz_slug']) ? sanitize_title($_GET['quiz_slug']) : '';
 $course_id = isset($_GET['cid']) ? intval($_GET['cid']) : 0;
 
-if (!$quiz_name || !$course_id) {
+if (!$quiz_slug || !$course_id) {
     echo '<p style="color:red;">Missing quiz parameters.</p>';
-    get_footer();
     return;
 }
 
 echo '<div class="quiz-container">';
-echo '<h2>Quiz for: ' . esc_html(ucwords(str_replace('-', ' ', $quiz_name))) . '</h2>';
+//echo '<h2>Quiz for: ' . esc_html(ucwords(str_replace('-', ' ', $quiz_slug))) . '</h2>';
 
 $course_sections = gdlr_lms_get_course_content_settings($course_id);
 $quiz_post_id = null;
@@ -25,7 +22,7 @@ $quiz_questions = [];
 foreach ($course_sections as $section) {
     $section_slug = sanitize_title($section['section-name'] ?? '');
 
-    if ($section_slug === $quiz_name && !empty($section['section-quiz']) && $section['section-quiz'] !== 'none') {
+    if ($section_slug === $quiz_slug && !empty($section['section-quiz']) && $section['section-quiz'] !== 'none') {
         $quiz_post_id = intval($section['section-quiz']);
         $matched_duration = !empty($section['wait-time']) ? intval($section['wait-time']) : 5;
 
@@ -49,6 +46,57 @@ foreach ($course_sections as $section) {
         break;
     }
 }
+
+// Check if the user has already taken the quiz
+if (is_user_logged_in()) {
+    $current_user = wp_get_current_user();
+
+    // Check if the quiz has been completed by the user
+    $quiz_taken = get_user_meta($current_user->ID, "quiz_{$quiz_slug}_completed", true);
+
+    if ($quiz_taken) {
+        get_header();
+        echo '<p>You have already completed this quiz.</p>';
+        
+        return;
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Process quiz submission
+    if (is_user_logged_in()) {
+        $current_user = wp_get_current_user();
+        $total_score = 0;
+        $total_questions = count($quiz_questions);
+        
+        foreach ($quiz_questions as $index => $question) {
+            if (isset($_POST['q' . ($index + 1)])) {
+                $selected_answer = sanitize_text_field($_POST['q' . ($index + 1)]);
+                
+                if (isset($question['correct_answer']) && $selected_answer === $question['correct_answer']) {
+                    $total_score++;
+                }
+            }
+        }
+
+        // Calculate score percentage
+        $score_percentage = ($total_score / $total_questions) * 100;
+        
+        // Store the score in user meta
+        update_user_meta($current_user->ID, "quiz_score_{$quiz_slug}", $score_percentage);
+        
+        // Mark the quiz as completed for the user
+        update_user_meta($current_user->ID, "quiz_{$quiz_slug}_completed", true);
+
+        // Redirect to the my-courses page after successful submission
+        wp_redirect(home_url('/my-courses'));
+        exit;
+    } else {
+        echo '<p>Please log in to submit the quiz.</p>';
+    }
+}
+
+get_header();
 
 if ($quiz_post_id) {
     echo '<p>This quiz must be completed in <strong>' . esc_html($matched_duration) . ' minutes</strong>.</p>';
@@ -84,7 +132,7 @@ if ($quiz_post_id) {
         </div>
         <?php
     else :
-        echo '<p style="color:red;">✅ Quiz found but no questions decoded. This usually means question JSON is malformed or not properly parsed.</p>';
+        echo '<p style="color:red;">No questions decoded.</p>';
     endif;
 } else {
     echo '<p>No quiz found for this module.</p>';
@@ -93,6 +141,29 @@ if ($quiz_post_id) {
 echo '</div>';
 ?>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const timerElement = document.getElementById('quiz-timer');
+    if (!timerElement) return;
+
+    const durationInMinutes = parseInt(timerElement.dataset.mins || "5", 10);
+    let duration = durationInMinutes * 60;
+    const display = document.getElementById('countdown');
+    const form = document.getElementById('quiz-form');
+
+    let timer = setInterval(function () {
+        let minutes = String(Math.floor(duration / 60)).padStart(2, '0');
+        let seconds = String(duration % 60).padStart(2, '0');
+        display.textContent = `${minutes}:${seconds}`;
+
+        if (--duration < 0) {
+            clearInterval(timer);
+            alert('⏰ Time is up! Submitting your quiz...');
+            if (form) form.submit();
+        }
+    }, 1000);
+});
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const timerElement = document.getElementById('quiz-timer');
@@ -172,5 +243,3 @@ document.addEventListener('DOMContentLoaded', function () {
   background: #003080;
 }
 </style>
-
-<?php get_footer(); ?>
