@@ -5,14 +5,16 @@ if (is_user_logged_in()) {
     wp_redirect(site_url('/user-dashboard'));
     exit;
 }
-get_header();
 
 
 function custom_register_user() {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $username = sanitize_user($_POST['username']);
-        $email = sanitize_email($_POST['email']);
-        $password = $_POST['password'];
+        $username     = sanitize_user($_POST['username']);
+        $email        = sanitize_email($_POST['email']);
+        $password     = $_POST['password'];
+        $phone_number = sanitize_text_field($_POST['phone_number']);
+        $first_name   = sanitize_text_field($_POST['first_name']); // NEW
+        $last_name    = sanitize_text_field($_POST['last_name']);   // NEW
 
         $errors = new WP_Error();
 
@@ -23,6 +25,11 @@ function custom_register_user() {
         if (empty($errors->errors)) {
             $user_id = wp_create_user($username, $password, $email);
             if (!is_wp_error($user_id)) {
+                // Save extra fields
+                update_user_meta($user_id, 'phone_number', $phone_number);
+                update_user_meta($user_id, 'first_name', $first_name);
+                update_user_meta($user_id, 'last_name', $last_name);
+
                 wp_set_current_user($user_id);
                 wp_set_auth_cookie($user_id);
                 wp_redirect(site_url('/user-dashboard'));
@@ -37,8 +44,11 @@ function custom_register_user() {
     return new WP_Error();
 }
 
+
 $errors = custom_register_user();
+get_header();
 ?>
+
 
 <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.4.2/css/all.css">
 
@@ -195,14 +205,30 @@ $errors = custom_register_user();
         <?php endif; ?>
 
         <form method="POST">
+            
             <div class="input-group">
                 <i class="fa-regular fa-user"></i>
                 <input type="text" name="username" placeholder="Username" required>
+            </div>
+            
+        <div class="input-group">
+                <i class="fa-regular fa-id-badge"></i>
+                <input type="text" name="first_name" placeholder="First Name" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-regular fa-id-card"></i>
+                <input type="text" name="last_name" placeholder="Last Name" required>
             </div>
 
             <div class="input-group">
                 <i class="fa-regular fa-envelope"></i>
                 <input type="email" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-regular fa-phone"></i>
+                <input type="tel" name="phone_number" placeholder="Phone Number" required>
             </div>
 
             <div class="input-group">

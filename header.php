@@ -190,7 +190,7 @@
         <ul id="menu">
           <li><a href="<?php echo home_url(); ?>">Home</a></li>
           <li><a href="<?php echo site_url('/courses'); ?>">Courses</a></li>
-          <li><a href="#">About</a></li>
+          <li><a href="<?php echo site_url('/about'); ?>">About</a></li>
           <li><a href="#">Contact</a></li>
           <li><a href="<?php echo site_url('/login'); ?>" class="cta">Login</a></li>
           <li><a href="<?php echo site_url('/signup'); ?>" class="cta">Signup</a></li>

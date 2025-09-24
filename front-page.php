@@ -356,6 +356,62 @@ section {
     background-color: #ffffff;
 }
 
+/* Stats Section */
+.stats-section {
+  background: #002c6a;
+  color: white;
+  padding: 3rem 2rem;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+  gap: 2rem;
+  text-align: center;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.stats-grid h3 {
+  font-size: 2rem;
+  color: #ffcc00;
+  margin-bottom: 0.5rem;
+}
+.stats-grid p {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Process Section */
+.process-section {
+  background: #f9fbff;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+.process-section h2 {
+  color: #004aad;
+  margin-bottom: 2rem;
+}
+.process-grid {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+.process-grid div {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  width: 220px;
+  transition: transform 0.3s ease;
+}
+.process-grid div:hover {
+  transform: translateY(-6px);
+}
+.process-grid i {
+  font-size: 2rem;
+  color: #004aad;
+  margin-bottom: 1rem;
+}
 
 
 </style>
@@ -371,6 +427,56 @@ section {
         <img src="https://images.stockcake.com/public/7/e/a/7ea17dad-b620-48de-99ea-6b49a2c3e861_large/corporate-training-session-stockcake.jpg" alt="Modern corporate training session">
     </div>
 </section>
+<!-- STATS SECTION -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <?php
+    // Total Courses (post type = 'course')
+    $total_courses = wp_count_posts('course')->publish;
+
+    // Total Instructors (all users with role 'instructor')
+    $instructors = get_users(['role' => 'instructor']);
+    $total_instructors = count($instructors);
+
+    // Total Students (all users with role 'student')
+    $students = get_users(['role' => 'student']);
+    $total_students = count($students);
+
+    // Certificates (assuming gdlr-lms issues certificates via post type 'certificate')
+    // If different, replace 'certificate' with the right post type
+    $certificates = wp_count_posts('certificate')->publish;
+    ?>
+
+    <div>
+      <h3><?php echo number_format($total_courses); ?>+</h3>
+      <p>Total Courses</p>
+    </div>
+    <div>
+      <h3><?php echo number_format($total_instructors); ?>+</h3>
+      <p>Total Instructors</p>
+    </div>
+    <div>
+      <h3><?php echo number_format($total_students); ?>+</h3>
+      <p>Total Students</p>
+    </div>
+    <div>
+      <h3><?php echo number_format($certificates); ?>+</h3>
+      <p>Total Certificates</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- PROCESS SECTION -->
+<section class="process-section">
+  <h2>Working Process & Benefits</h2>
+  <div class="process-grid">
+    <div><i class="fa fa-search"></i><h4>Find Course</h4></div>
+    <div><i class="fa fa-ticket"></i><h4>Book Seat</h4></div>
+    <div><i class="fa fa-certificate"></i><h4>Get Certificate</h4></div>
+  </div>
+</section>
+
 <section class="skills-section" data-aos="fade-right">
     <h2 style="color:white;">All the Skills You Need in One Place</h2>
     <div class="skills-grid">
